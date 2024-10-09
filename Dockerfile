@@ -4,6 +4,8 @@ FROM node:18-alpine AS builder
 # Step 2: Set the working directory inside the container
 WORKDIR /app
 
+ENV HOST 0.0.0.0
+
 # Step 3: Copy the package.json and package-lock.json (or pnpm-lock.yaml) files
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
