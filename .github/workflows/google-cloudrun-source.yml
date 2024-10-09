@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -27,15 +27,9 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          build_args=$(cat <<EOF
-            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }}
-          EOF
-          )
-
           docker build \
-            $build_args \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
-            .
+            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA .
 
       - name: Push Docker image
         run: |
@@ -49,4 +43,5 @@ jobs:
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --set-env-vars JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
