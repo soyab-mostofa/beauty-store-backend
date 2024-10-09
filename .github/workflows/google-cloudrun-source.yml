@@ -40,5 +40,6 @@ jobs:
           gcloud run deploy beauty-store \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest \
             --platform managed \
+            --allow-unauthenticated \
             --region ${{ secrets.GCP_REGION }} \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }} \
