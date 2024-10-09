@@ -1,5 +1,5 @@
 # Use the official Node.js image as a base
-FROM node:22
+FROM node:20.17.0-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY . .
 RUN pnpm run build
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 8080
 
 # Command to run the application
 CMD ["node", "dist/server.js"]
