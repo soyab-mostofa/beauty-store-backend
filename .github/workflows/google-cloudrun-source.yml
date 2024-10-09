@@ -35,6 +35,5 @@ jobs:
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
-            --allow-unauthenticated \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
