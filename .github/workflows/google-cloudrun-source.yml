@@ -31,7 +31,7 @@ jobs:
             --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
             --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
             --output type=docker \
-            .
+            .   # <- Make sure the build path is last!
 
       - name: Push Docker image
         run: |
