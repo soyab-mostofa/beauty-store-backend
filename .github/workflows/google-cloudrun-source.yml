@@ -13,9 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Log in to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -24,23 +21,15 @@ jobs:
       - name: Configure Docker for gcloud
         run: gcloud auth configure-docker --quiet
 
-      - name: Build Docker image
+      - name: Build and Push Docker Image
         run: |
-          echo "Building Docker image..."
-          docker buildx build \
-            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
-            --output type=docker \
-            .   # <- Make sure the build path is last!
-
-      - name: Push Docker image
-        run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest -f Dockerfile .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy beauty-store \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest \
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
