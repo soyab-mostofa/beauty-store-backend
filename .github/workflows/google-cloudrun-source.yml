@@ -1,38 +1,44 @@
-name: Deploy to Cloud Run
+name: Deploy to Google Cloud Run
 
 on:
   push:
     branches:
-      - main # Triggers deployment on push to the 'main' branch
+      - main
 
 jobs:
-  deploy:
-    name: Deploy to Google Cloud Run
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
+      # Step 1: Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v0"
+      # Step 2: Set up Docker Buildx for building the image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Configure gcloud auth
-        run: gcloud auth activate-service-account --key-file="${{ secrets.GCP_SA_KEY }}"
+      # Step 4: Set up Google Cloud SDK for Docker
+      - name: Set up Google Cloud SDK
+        run: gcloud auth configure-docker gcr.io --quiet
 
+      # Step 5: Build and Push Docker Image to Google Container Registry (GCR)
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest -f Dockerfile .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest
+
+      # Step 6: Deploy to Google Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy beauty-store-backend \
-            --image=gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store-backend:$GITHUB_SHA \
-            --platform=managed \
-            --region=${{ secrets.GCP_REGION }} \
-            --allow-unauthenticated \
-            --port=8080 \
-            --set-env-vars=DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }}
-
-      - name: Clean up
-        run: docker rmi gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store-backend:$GITHUB_SHA
+          gcloud run deploy beauty-store \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:latest \
+            --platform managed \
+            --region ${{ secrets.GCP_REGION }} \
+            --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }} \
