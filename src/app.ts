@@ -11,7 +11,6 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
-console.log("app running");
 
 // Routes
 app.use("/api/users", userRoutes);
