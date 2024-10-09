@@ -42,4 +42,3 @@ jobs:
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            --project ${{ secrets.GCP_PROJECT_ID }}
