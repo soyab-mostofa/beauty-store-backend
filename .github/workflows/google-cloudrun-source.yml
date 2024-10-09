@@ -28,12 +28,7 @@ jobs:
         run: |
           echo "Building Docker image..."
           build_args=$(cat <<EOF
-            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
-            --build-arg _REDIS_URL=${{ secrets.REDIS_URL }} \
-            --build-arg _REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} \
-            --build-arg _BASE_URL=${{ secrets.BASE_URL }} \
-            --build-arg _SIGNATURE_KEY=${{ secrets.SIGNATURE_KEY }} \
-            --build-arg _STORE_ID=${{ secrets.STORE_ID }}
+            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }}
           EOF
           )
 
@@ -48,15 +43,10 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy inkam-ux \
+          gcloud run deploy beauty-store \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
             --set-env-vars MONGODB_URI=${{ secrets.DATABASE_URL }} \
-            --set-env-vars REDIS_URL=${{ secrets.REDIS_URL }} \
-            --set-env-vars REDIS_TOKEN=${{ secrets.REDIS_TOKEN }} \
-            --set-env-vars BASE_URL=${{ secrets.BASE_URL }} \
-            --set-env-vars SIGNATURE_KEY=${{ secrets.SIGNATURE_KEY }} \
-            --set-env-vars STORE_ID=${{ secrets.STORE_ID }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
