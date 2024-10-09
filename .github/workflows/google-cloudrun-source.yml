@@ -27,9 +27,11 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build \
+          docker buildx build \
             --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA .
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
+            --output type=docker \
+            .
 
       - name: Push Docker image
         run: |
