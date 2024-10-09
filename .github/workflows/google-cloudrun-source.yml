@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,26 +26,20 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          build_args=$(cat <<EOF
-            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }}
-          EOF
-          )
-
           docker build \
-            $build_args \
+            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
             .
 
       - name: Push Docker image
-        run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA
+        run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy beauty-store \
-           --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
-           --platform managed \
-           --region ${{ secrets.GCP_REGION }} \
-           --allow-unauthenticated \
-           --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} \
-           --project ${{ secrets.GCP_PROJECT_ID }}
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
+            --platform managed \
+            --region ${{ secrets.GCP_REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
