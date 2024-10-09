@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -26,13 +27,19 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
+          build_args=$(cat <<EOF
+            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }}
+          EOF
+          )
+
           docker build \
-            --build-arg _MONGODB_URI=${{ secrets.DATABASE_URL }} \
+            $build_args \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA \
             .
 
       - name: Push Docker image
-        run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA
+        run: |
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/beauty-store:$GITHUB_SHA
 
       - name: Deploy to Cloud Run
         run: |
